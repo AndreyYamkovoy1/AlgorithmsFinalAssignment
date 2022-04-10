@@ -29,12 +29,9 @@ public class FinalAssignment {
 		for(int i = 0;i < StopsList.size();i++){
 			TSTtree.put(StopsList.get(i).stop_name,StopsList.get(i));
 		}
-		
-
-		}
+	}
 	
 	public class Stop{
-		//stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,location_type,parent_station
 		int stopOrderFromInput;
 		int stop_id;
 		int stop_code;
@@ -66,7 +63,6 @@ public class FinalAssignment {
 		}
 	}
 	public class StopTimes{
-		//trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,pickup_type,drop_off_type,shape_dist_traveled
 		int trip_id;
 		String arrival_time;
 		String departure_time;
@@ -90,7 +86,6 @@ public class FinalAssignment {
 		}
 	}
 	public class Transfer{
-		//from_stop_id,to_stop_id,transfer_type,min_transfer_time
 		int from_stop_id;
 		int to_stop_id;
 		int transfer_type;
@@ -113,13 +108,11 @@ public class FinalAssignment {
 			int fileLineNum = 0;
 			// Loop that reads every line, breaks it into different pieces and assigns to stop class values
 			while((strLine = br.readLine()) != null) {
-				//System.out.println(fileLineNum);
 				if(fileLineNum > 0) {
 					int new_from_stop_id;
 					int new_to_stop_id;
 					int new_transfer_type;
 					int new_transfer_time;
-					//String resultStr = strLine.replaceAll("[ ]+", " ").trim();
 					String[] values = strLine.split(",");
 					if(values[0].equals(" ")){
 						new_from_stop_id = -1;
@@ -196,7 +189,7 @@ public class FinalAssignment {
 		return name;
 	}
 	
-	public String fixTime(String time){
+	public boolean checkTime(String time){
 		String input = time;
 		if(time.charAt(0) == ' ') {
 			input = "0"+input.substring(1);
@@ -205,32 +198,16 @@ public class FinalAssignment {
 		Integer firstNum = (Integer.parseInt(input.substring(0,1))*10)+(Integer.parseInt(input.substring(1,2)));
 		Integer secondNum = (Integer.parseInt(input.substring(3,4))*10)+(Integer.parseInt(input.substring(4,5)));
 		Integer thirdNum = (Integer.parseInt(input.substring(6,7))*10)+(Integer.parseInt(input.substring(7,8)));
-		String timeValue1 = "";
-		String timeValue2 = "";
-		String timeValue3 = "";
 		if( firstNum > 23){
-			timeValue1 = "23";
+			return true;
 		}
 		if(secondNum > 59){
-			timeValue2 = "59";
+			return true;
 		}
 		if(thirdNum > 59){
-			timeValue3 = "59";
+			return true;
 		}
-		timeValue1 = firstNum.toString();
-		timeValue2 = secondNum.toString();
-		timeValue3 = thirdNum.toString();
-		if(firstNum < 10) {
-			timeValue1 = "0"+timeValue1;
-		}
-		if(secondNum < 10) {
-			timeValue2 = "0"+timeValue2;
-		}
-		if(thirdNum < 10) {
-			timeValue3 = "0"+timeValue3;
-		}
-		String result = timeValue1+":"+timeValue2+":"+timeValue3;
-		return result;
+		return false;
 	}
 	
 	public ArrayList<Stop> getStops(ArrayList<Stop> stops,String stopsFileName){
@@ -245,7 +222,6 @@ public class FinalAssignment {
 			while((strLine = br.readLine()) != null) {
 				//System.out.println(fileLineNum);
 				if(fileLineNum > 0) {
-					
 					int new_stop_id;
 					int new_stop_code;
 					String new_stop_name;
@@ -346,8 +322,9 @@ public class FinalAssignment {
 			int fileLineNum = 0;
 			int i =0;
 			// Loop that reads every line, breaks it into different pieces and assigns to stop class values
+			boolean skip = false;
 			while((strLine = br.readLine()) != null) {
-				//System.out.println(fileLineNum);
+				skip = false;
 				if(fileLineNum > 0) {
 					int new_trip_id;
 					String new_arrival_time;
@@ -367,10 +344,11 @@ public class FinalAssignment {
 						new_trip_id = Integer.parseInt(values[0]);
 					}
 					new_arrival_time = values[1];
-					new_arrival_time = fixTime(new_arrival_time);
+					skip = checkTime(new_arrival_time);
 					
 					new_departure_time = values[2];
-					new_departure_time = fixTime(new_departure_time);
+					
+					skip = skip && checkTime(new_departure_time);
 					if(values[3].equals(" ")){
 						new_stop_id = -1;
 					}
@@ -403,22 +381,23 @@ public class FinalAssignment {
 					else {
 						new_shape_dist_traveled = -1;
 					}
-					StopTimes newStopTimes = new StopTimes(new_trip_id,new_arrival_time,new_departure_time,new_stop_id,new_stop_sequence,new_stop_headsign,new_pickup_type,new_dropoff_type,new_shape_dist_traveled);
-					//System.out.println("Trip id: "+new_trip_id+" , Arrival time: "+new_arrival_time+" , Departure time: "+new_departure_time+" , Stop id: "+
-					//		new_stop_id+" , Stop sequence: "+new_stop_sequence+" , Stop headsign: "+new_stop_headsign+" , pickup type: "+new_pickup_type+" , dropoff type: "+
-					//		new_dropoff_type+" , shape dist travelled: "+new_shape_dist_traveled);
-					stopTimes.add(newStopTimes);
-					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
-					if(map.containsKey(new_arrival_time) == false){
-
-						 
-						list.add(newStopTimes);
-						map.put(new_arrival_time,list);
-					}
-					else if(map.containsKey(new_arrival_time)){
-						list = map.get(new_arrival_time);
-						list.add(newStopTimes);
-						map.put(new_arrival_time,list);
+					if(!skip) {
+						StopTimes newStopTimes = new StopTimes(new_trip_id,new_arrival_time,new_departure_time,new_stop_id,new_stop_sequence,new_stop_headsign,new_pickup_type,new_dropoff_type,new_shape_dist_traveled);
+						//System.out.println("Trip id: "+new_trip_id+" , Arrival time: "+new_arrival_time+" , Departure time: "+new_departure_time+" , Stop id: "+
+						//		new_stop_id+" , Stop sequence: "+new_stop_sequence+" , Stop headsign: "+new_stop_headsign+" , pickup type: "+new_pickup_type+" , dropoff type: "+
+						//		new_dropoff_type+" , shape dist travelled: "+new_shape_dist_traveled);
+						stopTimes.add(newStopTimes);
+						ArrayList<StopTimes> list = new ArrayList<StopTimes>();
+						if(map.containsKey(new_arrival_time) == false){						 
+							list.add(newStopTimes);
+							map.put(new_arrival_time,list);
+						}
+						else if(map.containsKey(new_arrival_time)){
+							list = map.get(new_arrival_time);
+							list.add(newStopTimes);
+							map.put(new_arrival_time,list);
+						}
+						numStopTimes++;
 					}
 				}
 				else if(fileLineNum == 0){
@@ -428,11 +407,9 @@ public class FinalAssignment {
 				fileLineNum++;
 				
 			}
-			numStopTimes = fileLineNum-1;
-			System.out.println("Number of StopTimes): "+numStopTimes);
+			System.out.println("Number of StopTimes: "+numStopTimes);
 			in.close();
 		}
-		//Error catcher
 		catch(Exception e){
 			System.err.println("Error: " + e.getMessage());
 		}
@@ -450,8 +427,6 @@ public class FinalAssignment {
 		System.out.println("Initializing matrix");
 		for(int i = 0; i < numStops; i++){
 			for(int j = 0; j < numStops; j++){
-				//double val = graph[i][j];
-				//distance[i][j] = val;
 				if (graph[i][j] == Double.MAX_VALUE) {
 					next[i][j] = -1;
 				}  
@@ -496,9 +471,8 @@ public class FinalAssignment {
 	}
 	 void floydWarshall(int V,double[][] distance,int[][] next)
 	 {
-		 System.out.println("Calculating floyd warshall algh");
+		 System.out.println("Calculating Floyd Warshall algorithm.");
 	     for(int k = 0; k < V; k++){
-	    	// System.out.println(k);
 	    	 for(int i = 0; i < V; i++){
 	    		 for(int j = 0; j < V; j++){
 	    			 if(distance[i][k] == Double.MAX_VALUE || distance[k][j] == Double.MAX_VALUE){
@@ -534,7 +508,6 @@ public class FinalAssignment {
 		int x = 0;
 		int y = 0;
 		double weight = 0;
-		//Populate 2d array with values from input
 		for(int i = 0;i < numStops;i++) {
 			for(int j = 0;j < numStops;j++){
 				graph[i][j] = Double.MAX_VALUE;
@@ -562,8 +535,6 @@ public class FinalAssignment {
     		}
     		
     		weight = calcWeight(true,false,TransfersList.get(i));
-    		//System.out.println("m: "+m+" n: "+n+" weight: "+weight);
-    		//System.out.println("x: "+x+" y: "+ y);
     		graph[m][n] = weight;
     	}
     	for(int i = 0;i < numStopTimes;i++){
@@ -597,13 +568,7 @@ public class FinalAssignment {
     		}
     		weight = 1.0;
     		graph[m][n] = weight;
-    		//System.out.println("m: "+m+" n: "+n+" weight: "+weight);
-    		//System.out.println("x: "+x+" y: "+ y);
-    		
-    	}
-    	
-    	
-    			
+    	}		
 		return graph;
 	}
 	void printPath(ShortestPathResult result)
@@ -624,6 +589,7 @@ public class FinalAssignment {
 		}
 		return index;
 	}
+		/*
 	public String createDistanceFile(){
 		
 		String newDistanceFileName = "";
@@ -642,6 +608,7 @@ public class FinalAssignment {
 		}
 		return newDistanceFileName;
 	}
+	
 	public String createNextFile(){
 		String newNextFileName = "";
 		try {
@@ -790,6 +757,7 @@ public class FinalAssignment {
 		
 		
 	}
+	*/
 	public class TST<T>{
 		private TSTNode<T> root;
 		public TST(){
@@ -829,7 +797,6 @@ public class FinalAssignment {
 				}
 				character = key.charAt(0);
 				if (key.length() > 1) {
-					// Stores the rest of the key in a midlle-link chain
 					middle = new TSTNode(key.substring(1), value);
 				} else {
 					this.value = value;
@@ -913,7 +880,7 @@ public class FinalAssignment {
 				 }
 				
 				if (index >= key.length()) {
-			        return; //collectValues(this,result);
+			        return;
 			    }
 				 Character c = key.charAt(index);
 				 if(c == this.character) {
@@ -956,9 +923,6 @@ public class FinalAssignment {
 				 }
 				 return;
 			}
-			
-			
-			
 			public TSTNode<T> search(String key){
 				TSTNode<T> node = search(key,0);
 				if(node == null){
@@ -1012,18 +976,16 @@ public class FinalAssignment {
 	public static void main(String[] args) throws FileNotFoundException {
 		boolean Finished = false;
 		boolean firstPass = true;
+		//Files for small scall testing
     	//FinalAssignment test = new FinalAssignment("smallStops","smallStoptimes","smallTransfers");
     	FinalAssignment test = new FinalAssignment("stops.txt","stop_times.txt","transfers.txt");
     	Scanner input = new Scanner(System.in);
     	double[][] graph = new double[test.numStops][test.numStops];
 		int[][] next = new int [test.numStops][test.numStops];
-    	
-    	
-    	//System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
-    	
+	
     	while(!Finished) {
-    		System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
-    		String inputChoice = input.next();
+    		System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points. \n Input 2 to search for bus stop by name. \n Input 3 to search for all trips with a given arrival time.");
+    		String inputChoice = input.nextLine();
     		
     		Integer choice = 0;
     		if(inputChoice.equals("exit")) {
@@ -1042,20 +1004,18 @@ public class FinalAssignment {
         		choice = 3;
         	}
         	else {
-        		System.out.println("Invalid input \nPlease input either 1,2,3 or exit");
+        		System.out.println("Invalid input \nPlease input either 1, 2, 3 or exit");
         	}
         	
     		if(choice == 1) {
     			System.out.println("Choice: "+choice);
-    			//double[][] graph = new double[test.numStops][test.numStops];
-    			//int[][] next = new int [test.numStops][test.numStops];
+    			
         		if(firstPass == true) {
-        			//double[][] graph = new double[test.numStops][test.numStops];
+        			
         			System.out.println("Forming Graph");
                 	graph = test.makeGraph(test.numStops,graph);
                 	System.out.println("Graph formed");
-                	//double[][] distance = new double [test.numStops][test.numStops];
-                	//int[][] next = new int [test.numStops][test.numStops];
+                	
                 	
                 	test.initializeMatrix(test.numStops, graph,next);
                 	
@@ -1063,7 +1023,7 @@ public class FinalAssignment {
                 	firstPass = false;
         		}
         		
-            	
+            	//Used to save graph results for re-using during testing
             	//String newDistanceFile = test.createDistanceFile();
             	//String newNextFile = test.createNextFile();
             	//test.writeToDistanceFile(newDistanceFile,distance);
@@ -1079,14 +1039,16 @@ public class FinalAssignment {
             	System.out.println("Input two stops one at a time");
             	try {
             		inputFrom = input.nextInt();
-                	inputTo = input.nextInt();
+            		try {
+                		inputTo = input.nextInt();
+                	}
+                	catch(Exception InputMismatchException){
+                		System.out.println("Invalid input\nPlease input a stop id ");
+                	}
             	}
             	catch(Exception InputMismatchException){
-            		System.out.println("Invalid inputs\nPlease input two stop id's numbers");
+            		System.out.println("Invalid input\nPlease input a stop id ");
             	}
-            	
-            	//inputFrom = 30;
-            	//inputTo = 20;
             	int vertex1 = -1;
             	int vertex2 = -1;
             	if(test.getStopIndex(inputFrom) == -1) {
@@ -1124,7 +1086,7 @@ public class FinalAssignment {
         		
         		while(!waitingForInput) {
         			System.out.println("Input stop name or press exit to go back:");
-        			input.nextLine();
+        			//input.nextLine();
         			inputStopName = input.nextLine();
         			
         		
@@ -1132,27 +1094,17 @@ public class FinalAssignment {
         				waitingForInput = true;
         				continue;
         			}
-        			//inputStopName = "48 AVE AT";
+        			inputStopName = inputStopName.toUpperCase();
         			System.out.println("Searching for stops with stop name: "+inputStopName);
-            		inputStopName.toUpperCase();
-            		
-            			//if(inputStopName.equals(test.StopsList.get(j).stop_name)){
-            				ArrayList<Stop> result = test.TSTtree.searchAll(inputStopName);
-                    		for(int i = 0;i < result.size();i++){
-                    			System.out.println("Stop id: "+result.get(i).stop_id+" , Stop code: "+result.get(i).stop_code+" , Stop name: "+result.get(i).stop_name+" , Stop desc: "+
-                    					result.get(i).stop_desc+" , Stop lat: "+result.get(i).stop_lat+" , Stop lon: "+result.get(i).stop_lon+" , zone id: "+result.get(i).zone_id+" , stop url"+
-                    					result.get(i).stop_url+" , location type: "+result.get(i).location_type+" , Parent station: "+result.get(i).parent_station);
-                    		}
-                    		waitingForInput = true;
-                    		
-            			//}
-            			//else {
-            			//	System.out.println("Invalid Address \nPlease input another address or type exit to go back to menu");
-            			//}
-            		
-            		
+
+            		ArrayList<Stop> result = test.TSTtree.searchAll(inputStopName);
+                    for(int i = 0;i < result.size();i++){
+                    	System.out.println("Stop id: "+result.get(i).stop_id+" , Stop code: "+result.get(i).stop_code+" , Stop name: "+result.get(i).stop_name+" , Stop desc: "+
+                    	result.get(i).stop_desc+" , Stop lat: "+result.get(i).stop_lat+" , Stop lon: "+result.get(i).stop_lon+" , zone id: "+result.get(i).zone_id+" , stop url"+
+                    	result.get(i).stop_url+" , location type: "+result.get(i).location_type+" , Parent station: "+result.get(i).parent_station);
+                    }
+                    waitingForInput = true;
         		}
-        		
         	}
     		else if(choice == 3){
     			System.out.println("Choice: "+choice);
@@ -1172,13 +1124,9 @@ public class FinalAssignment {
         						val3 = "0"+val3;
         					}
         					String time =val1+":"+val2+":"+val3;
-        					//time = test.fixTime(time);
         					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
         					if(test.map.containsKey(time)) {
         						list = test.map.get(time);
-            					//for(int l = 0;l < list.size();l++){
-            					//	System.out.println("Trip id: "+list.get(l).trip_id+","+" arrival time: "+time);
-            					//}
         					}
         					
         				}
@@ -1197,7 +1145,6 @@ public class FinalAssignment {
         			if(test.map.containsKey(inputTime)) {
             			list = test.map.get(inputTime);
             			for(int l = 0;l < list.size();l++){
-        					//System.out.println(" Added Trip id: "+list.get(l).trip_id);
         					tripIds.add(list.get(l).trip_id);
         				}
             			Collections.sort(tripIds);
@@ -1211,7 +1158,6 @@ public class FinalAssignment {
                 			}
                 		}
                 		for(int i = 0;i < sortedList.size();i++) {
-                			//System.out.println(sortedList.get(i).trip_id);
                 			System.out.println("Trip id: "+sortedList.get(i).trip_id+" , Arrival time: "+sortedList.get(i).arrival_time+" , Departure time: "+sortedList.get(i).departure_time+" , Stop id: "
                 					+sortedList.get(i).stop_id+" , Stop sequence: "+sortedList.get(i).stop_sequence+" , Stop headsign: "+sortedList.get(i).stop_headsign+" , pickup type: "+sortedList.get(i).pickup_type+" , dropoff type: "+
                 					sortedList.get(i).dropoff_type+" , shape dist travelled: "+sortedList.get(i).shape_dist_traveled);
@@ -1219,16 +1165,10 @@ public class FinalAssignment {
             			
             		}
             		else {
-            			System.out.println("No trips with the arrival time: "+inputTime);//+"\nPlease input another arrival time or type exit to go back to menu");
+            			System.out.println("No trips with the arrival time: "+inputTime);
             		}
         			System.out.println("\nPlease input another arrival time or type exit to go back to menu");
-        		}
-        		//System.out.println("");
-        		//System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time \n Or enter exit to stop the program");
-            	
-        		
-        		
-        		
+        		}	
         	}
     		
     	}
@@ -1236,4 +1176,3 @@ public class FinalAssignment {
     	input.close();
     }
 }
-
