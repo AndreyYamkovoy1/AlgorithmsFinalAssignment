@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -27,9 +26,9 @@ public class FinalAssignment {
 		this.TransfersList = getTransfers(this.TransfersList,transfersFilename);
 		this.StopsTimesList = getStopsTimes(this.StopsTimesList,stopTimesFilename);
 
-		//for(int i = 0;i < StopsList.size();i++){
-		//	TSTtree.put(StopsList.get(i).stop_name,StopsList.get(i));
-		//}
+		for(int i = 0;i < StopsList.size();i++){
+			TSTtree.put(StopsList.get(i).stop_name,StopsList.get(i));
+		}
 		
 
 		}
@@ -114,7 +113,7 @@ public class FinalAssignment {
 			int fileLineNum = 0;
 			// Loop that reads every line, breaks it into different pieces and assigns to stop class values
 			while((strLine = br.readLine()) != null) {
-				System.out.println(fileLineNum);
+				//System.out.println(fileLineNum);
 				if(fileLineNum > 0) {
 					int new_from_stop_id;
 					int new_to_stop_id;
@@ -150,8 +149,8 @@ public class FinalAssignment {
 						new_transfer_time = Integer.parseInt(values[3]);
 					}
 					Transfer newTransfer = new Transfer(new_from_stop_id,new_to_stop_id,new_transfer_type,new_transfer_time);
-					System.out.println("From stop id: "+new_from_stop_id+" , To stop id: "+new_to_stop_id+" , Transfer type: "+new_transfer_type+" , transfer time: "+
-							new_transfer_time);
+					//System.out.println("From stop id: "+new_from_stop_id+" , To stop id: "+new_to_stop_id+" , Transfer type: "+new_transfer_type+" , transfer time: "+
+					//		new_transfer_time);
 					transfers.add(newTransfer);
 				}
 				else if(fileLineNum == 0){
@@ -244,7 +243,7 @@ public class FinalAssignment {
 			int i =0;
 			// Loop that reads every line, breaks it into different pieces and assigns to stop class values
 			while((strLine = br.readLine()) != null) {
-				System.out.println(fileLineNum);
+				//System.out.println(fileLineNum);
 				if(fileLineNum > 0) {
 					
 					int new_stop_id;
@@ -310,9 +309,9 @@ public class FinalAssignment {
 					}
 					Stop newStop = new Stop(i-1,new_stop_id,new_stop_code,new_stop_name,new_stop_desc,new_stop_lat,new_stop_lon,new_zone_id,new_stop_url,
 							new_location_type,new_parent_station);
-					System.out.println("Stop id: "+new_stop_id+" , Stop code: "+new_stop_code+" , Stop name: "+new_stop_name+" , Stop desc: "+
-							new_stop_desc+" , Stop lat: "+new_stop_lat+" , Stop lon: "+new_stop_lon+" , zone id: "+new_zone_id+" , stop url"+
-							new_stop_url+" , location type: "+new_location_type+" , Parent station: "+new_parent_station);
+					//System.out.println("Stop id: "+new_stop_id+" , Stop code: "+new_stop_code+" , Stop name: "+new_stop_name+" , Stop desc: "+
+					//		new_stop_desc+" , Stop lat: "+new_stop_lat+" , Stop lon: "+new_stop_lon+" , zone id: "+new_zone_id+" , stop url"+
+					//		new_stop_url+" , location type: "+new_location_type+" , Parent station: "+new_parent_station);
 					stops.add(newStop);
 				}
 				else if(fileLineNum == 0){
@@ -348,7 +347,7 @@ public class FinalAssignment {
 			int i =0;
 			// Loop that reads every line, breaks it into different pieces and assigns to stop class values
 			while((strLine = br.readLine()) != null) {
-				System.out.println(fileLineNum);
+				//System.out.println(fileLineNum);
 				if(fileLineNum > 0) {
 					int new_trip_id;
 					String new_arrival_time;
@@ -405,9 +404,9 @@ public class FinalAssignment {
 						new_shape_dist_traveled = -1;
 					}
 					StopTimes newStopTimes = new StopTimes(new_trip_id,new_arrival_time,new_departure_time,new_stop_id,new_stop_sequence,new_stop_headsign,new_pickup_type,new_dropoff_type,new_shape_dist_traveled);
-					System.out.println("Trip id: "+new_trip_id+" , Arrival time: "+new_arrival_time+" , Departure time: "+new_departure_time+" , Stop id: "+
-							new_stop_id+" , Stop sequence: "+new_stop_sequence+" , Stop headsign: "+new_stop_headsign+" , pickup type: "+new_pickup_type+" , dropoff type: "+
-							new_dropoff_type+" , shape dist travelled: "+new_shape_dist_traveled);
+					//System.out.println("Trip id: "+new_trip_id+" , Arrival time: "+new_arrival_time+" , Departure time: "+new_departure_time+" , Stop id: "+
+					//		new_stop_id+" , Stop sequence: "+new_stop_sequence+" , Stop headsign: "+new_stop_headsign+" , pickup type: "+new_pickup_type+" , dropoff type: "+
+					//		new_dropoff_type+" , shape dist travelled: "+new_shape_dist_traveled);
 					stopTimes.add(newStopTimes);
 					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
 					if(map.containsKey(new_arrival_time) == false){
@@ -447,12 +446,12 @@ public class FinalAssignment {
 	
 	
 	
-	public void initializeMatrix(int numStops,double[][] graph,double[][] distance,int[][] next){
+	public void initializeMatrix(int numStops,double[][] graph,int[][] next){
 		System.out.println("Initializing matrix");
 		for(int i = 0; i < numStops; i++){
 			for(int j = 0; j < numStops; j++){
-				double val = graph[i][j];
-				distance[i][j] = val;
+				//double val = graph[i][j];
+				//distance[i][j] = val;
 				if (graph[i][j] == Double.MAX_VALUE) {
 					next[i][j] = -1;
 				}  
@@ -497,7 +496,7 @@ public class FinalAssignment {
 	}
 	 void floydWarshall(int V,double[][] distance,int[][] next)
 	 {
-		 System.out.print("Calculating floyd warshall algh");
+		 System.out.println("Calculating floyd warshall algh");
 	     for(int k = 0; k < V; k++){
 	    	// System.out.println(k);
 	    	 for(int i = 0; i < V; i++){
@@ -563,8 +562,8 @@ public class FinalAssignment {
     		}
     		
     		weight = calcWeight(true,false,TransfersList.get(i));
-    		System.out.println("m: "+m+" n: "+n+" weight: "+weight);
-    		System.out.println("x: "+x+" y: "+ y);
+    		//System.out.println("m: "+m+" n: "+n+" weight: "+weight);
+    		//System.out.println("x: "+x+" y: "+ y);
     		graph[m][n] = weight;
     	}
     	for(int i = 0;i < numStopTimes;i++){
@@ -598,8 +597,8 @@ public class FinalAssignment {
     		}
     		weight = 1.0;
     		graph[m][n] = weight;
-    		System.out.println("m: "+m+" n: "+n+" weight: "+weight);
-    		System.out.println("x: "+x+" y: "+ y);
+    		//System.out.println("m: "+m+" n: "+n+" weight: "+weight);
+    		//System.out.println("x: "+x+" y: "+ y);
     		
     	}
     	
@@ -616,7 +615,7 @@ public class FinalAssignment {
 	    System.out.println("Path cost: "+result.sum);
 	}
 		public int getStopIndex(int inputId) {
-		int index = 0;
+		int index = -1;
 		for(int i = 0;i< numStops;i++) {
 			if(StopsList.get(i).stop_id == inputId) {
 				index = StopsList.get(i).stopOrderFromInput;
@@ -1011,120 +1010,230 @@ public class FinalAssignment {
 		}
 	}
 	public static void main(String[] args) throws FileNotFoundException {
+		boolean Finished = false;
+		boolean firstPass = true;
     	//FinalAssignment test = new FinalAssignment("smallStops","smallStoptimes","smallTransfers");
     	FinalAssignment test = new FinalAssignment("stops.txt","stop_times.txt","transfers.txt");
     	Scanner input = new Scanner(System.in);
-    	System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
-    	Integer choice = input.nextInt();
+    	double[][] graph = new double[test.numStops][test.numStops];
+		int[][] next = new int [test.numStops][test.numStops];
+    	
+    	
     	//System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
-    	if(choice == 1) {
+    	
+    	while(!Finished) {
+    		System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
+    		String inputChoice = input.next();
     		
-    		double[][] graph = new double[test.numStops][test.numStops];
-        	graph = test.makeGraph(test.numStops,graph);
-        	
-        	double[][] distance = new double [test.numStops][test.numStops];
-        	int[][] next = new int [test.numStops][test.numStops];
-        	
-        	test.initializeMatrix(test.numStops, graph,distance,next);
-        	
-        	test.floydWarshall(test.numStops,distance,next);
-        	
-        	//String newDistanceFile = test.createDistanceFile();
-        	//String newNextFile = test.createNextFile();
-        	//test.writeToDistanceFile(newDistanceFile,distance);
-        	//test.writeToNextFile(newNextFile,next);
-        	
-        	//distance = test.readDistanceAnswers("distanceResults.txt");
-        	//next = test.readNextAnswers("nextResults.txt");
-        	
-        	
-        	ShortestPathResult result;
-        	int inputFrom = 0;
-        	int inputTo = 0;
-        	System.out.print("Input two stops one at a time");
-        	inputFrom = input.nextInt();
-        	inputTo = input.nextInt();
-        	
-        	//inputFrom = 30;
-        	//inputTo = 20;
-        	int vertex1 = test.getStopIndex(inputFrom);
-        	int vertex2 = test.getStopIndex(inputTo);
-        	System.out.println("Shortest path from "+inputFrom+ " to "+inputTo);
-        	result = test.getShortestPath(vertex1,vertex2,next,distance);
-        	test.printPath(result);
-        	
-    	}
-    	if(choice == 2) {
-    		System.out.println("Input stop name:");
-    		//while(input.hasNext()) {
-    			String inputStopName = "WATERFRONT";
-        		inputStopName.toUpperCase();
-        		ArrayList<Stop> result_cute = test.TSTtree.searchAll(inputStopName);	
-    		//}
+    		Integer choice = 0;
+    		if(inputChoice.equals("exit")) {
+        		Finished = true;
+        		break;
+        	}
     		
-    	}
-    	if(choice == 3){
     		
-    		for(Integer i = 0;i<24;i++) {
-    			for(Integer j = 0;j<60;j++){
-    				for(Integer k = 0;k < 60;k++) {
-    					String val1 = i.toString();
-    					String val2 = j.toString();
-    					String val3 = k.toString();
-    					if(i < 10){
-    						val1 = "0"+val1;
-    					}
-    					if(j < 10){
-    						val2 = "0"+val2;
-    					}
-    					if(k < 10){
-    						val3 = "0"+val3;
-    					}
-    					String time =val1+":"+val2+":"+val3;
-    					//time = test.fixTime(time);
-    					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
-    					if(test.map.containsKey(time)) {
-    						list = test.map.get(time);
-        					for(int l = 0;l < list.size();l++){
-        						System.out.println("Trip id: "+list.get(l).trip_id+","+" arrival time: "+time);
+        	if(inputChoice.equals("1")){
+        		choice = 1;
+        	}
+        	else if(inputChoice.equals("2")){
+        		choice = 2;
+        	}
+        	else if(inputChoice.equals("3")){
+        		choice = 3;
+        	}
+        	else {
+        		System.out.println("Invalid input \nPlease input either 1,2,3 or exit");
+        	}
+        	
+    		if(choice == 1) {
+    			System.out.println("Choice: "+choice);
+    			//double[][] graph = new double[test.numStops][test.numStops];
+    			//int[][] next = new int [test.numStops][test.numStops];
+        		if(firstPass == true) {
+        			//double[][] graph = new double[test.numStops][test.numStops];
+        			System.out.println("Forming Graph");
+                	graph = test.makeGraph(test.numStops,graph);
+                	System.out.println("Graph formed");
+                	//double[][] distance = new double [test.numStops][test.numStops];
+                	//int[][] next = new int [test.numStops][test.numStops];
+                	
+                	test.initializeMatrix(test.numStops, graph,next);
+                	
+                	test.floydWarshall(test.numStops,graph,next);
+                	firstPass = false;
+        		}
+        		
+            	
+            	//String newDistanceFile = test.createDistanceFile();
+            	//String newNextFile = test.createNextFile();
+            	//test.writeToDistanceFile(newDistanceFile,distance);
+            	//test.writeToNextFile(newNextFile,next);
+            	
+            	//distance = test.readDistanceAnswers("distanceResults.txt");
+            	//next = test.readNextAnswers("nextResults.txt");
+            	
+            	
+            	ShortestPathResult result;
+            	int inputFrom = 0;
+            	int inputTo = 0;
+            	System.out.println("Input two stops one at a time");
+            	try {
+            		inputFrom = input.nextInt();
+                	inputTo = input.nextInt();
+            	}
+            	catch(Exception InputMismatchException){
+            		System.out.println("Invalid inputs\nPlease input two stop id's numbers");
+            	}
+            	
+            	//inputFrom = 30;
+            	//inputTo = 20;
+            	int vertex1 = -1;
+            	int vertex2 = -1;
+            	if(test.getStopIndex(inputFrom) == -1) {
+            		
+            	}
+            	else {
+            		vertex1 = test.getStopIndex(inputFrom);
+            	}
+            	if(test.getStopIndex(inputTo) == -1) {
+            		
+            	}
+            	else {
+            		vertex2 = test.getStopIndex(inputTo);
+            	}
+            	
+            	
+            	System.out.println("Shortest path from "+inputFrom+ " to "+inputTo);
+            	if(vertex1 == -1 || vertex2 == -1) {
+            		System.out.println("That stop id does not exist: "+inputTo);
+            	}
+            	else if(vertex2 == -1) {
+            		System.out.println("That stop id does not exist: "+inputFrom);
+            	}
+            	else {
+            		result = test.getShortestPath(vertex1,vertex2,next,graph);
+                	test.printPath(result);
+            	}
+            	
+            	
+        	}
+    		else if(choice == 2) {
+    			System.out.println("Choice: "+choice);
+    			boolean waitingForInput = false;
+    			String inputStopName = "";
+        		
+        		while(!waitingForInput) {
+        			System.out.println("Input stop name or press exit to go back:");
+        			input.nextLine();
+        			inputStopName = input.nextLine();
+        			
+        		
+        			if(inputStopName.equals("exit")){
+        				waitingForInput = true;
+        				continue;
+        			}
+        			//inputStopName = "48 AVE AT";
+        			System.out.println("Searching for stops with stop name: "+inputStopName);
+            		inputStopName.toUpperCase();
+            		
+            			//if(inputStopName.equals(test.StopsList.get(j).stop_name)){
+            				ArrayList<Stop> result = test.TSTtree.searchAll(inputStopName);
+                    		for(int i = 0;i < result.size();i++){
+                    			System.out.println("Stop id: "+result.get(i).stop_id+" , Stop code: "+result.get(i).stop_code+" , Stop name: "+result.get(i).stop_name+" , Stop desc: "+
+                    					result.get(i).stop_desc+" , Stop lat: "+result.get(i).stop_lat+" , Stop lon: "+result.get(i).stop_lon+" , zone id: "+result.get(i).zone_id+" , stop url"+
+                    					result.get(i).stop_url+" , location type: "+result.get(i).location_type+" , Parent station: "+result.get(i).parent_station);
+                    		}
+                    		waitingForInput = true;
+                    		
+            			//}
+            			//else {
+            			//	System.out.println("Invalid Address \nPlease input another address or type exit to go back to menu");
+            			//}
+            		
+            		
+        		}
+        		
+        	}
+    		else if(choice == 3){
+    			System.out.println("Choice: "+choice);
+        		for(Integer i = 0;i<24;i++) {
+        			for(Integer j = 0;j<60;j++){
+        				for(Integer k = 0;k < 60;k++) {
+        					String val1 = i.toString();
+        					String val2 = j.toString();
+        					String val3 = k.toString();
+        					if(i < 10){
+        						val1 = "0"+val1;
         					}
-    					}
-    					
-    				}
-    			}
-    		}
-    		ArrayList<Integer> tripIds = new ArrayList<Integer>();
-    		ArrayList<StopTimes> list = new ArrayList<StopTimes>();
-    		String inputTime = "00:00:20";
-    		if(test.map.containsKey(inputTime)) {
-    			list = test.map.get(inputTime);
-    			for(int l = 0;l < list.size();l++){
-					System.out.println(" Added Trip id: "+list.get(l).trip_id);
-					tripIds.add(list.get(l).trip_id);
-				}
-    			Collections.sort(tripIds);
-    			
-    			ArrayList<StopTimes> sortedList = new ArrayList<StopTimes>();
-        		for(int i = 0;i < tripIds.size();i++) {
-        			for(int j = 0;j< list.size();j++){
-        				if(tripIds.get(i) == list.get(j).trip_id) {
-        					sortedList.add(list.get(j));
+        					if(j < 10){
+        						val2 = "0"+val2;
+        					}
+        					if(k < 10){
+        						val3 = "0"+val3;
+        					}
+        					String time =val1+":"+val2+":"+val3;
+        					//time = test.fixTime(time);
+        					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
+        					if(test.map.containsKey(time)) {
+        						list = test.map.get(time);
+            					//for(int l = 0;l < list.size();l++){
+            					//	System.out.println("Trip id: "+list.get(l).trip_id+","+" arrival time: "+time);
+            					//}
+        					}
+        					
         				}
         			}
         		}
-        		for(int i = 0;i < sortedList.size();i++) {
-        			//System.out.println(sortedList.get(i).trip_id);
-        			System.out.println("Trip id: "+sortedList.get(i).trip_id+" , Arrival time: "+sortedList.get(i).arrival_time+" , Departure time: "+sortedList.get(i).departure_time+" , Stop id: "
-        					+sortedList.get(i).stop_id+" , Stop sequence: "+sortedList.get(i).stop_sequence+" , Stop headsign: "+sortedList.get(i).stop_headsign+" , pickup type: "+sortedList.get(i).pickup_type+" , dropoff type: "+
-        					sortedList.get(i).dropoff_type+" , shape dist travelled: "+sortedList.get(i).shape_dist_traveled);
+        		ArrayList<Integer> tripIds = new ArrayList<Integer>();
+        		ArrayList<StopTimes> list = new ArrayList<StopTimes>();
+        		boolean waitingForInput = false;
+        		System.out.println("Input arrival time:");
+        		while(!waitingForInput) {
+        			String inputTime = input.nextLine();
+        			if(inputTime.equals("exit")){
+        				waitingForInput = true;
+        				continue;
+        			}
+        			if(test.map.containsKey(inputTime)) {
+            			list = test.map.get(inputTime);
+            			for(int l = 0;l < list.size();l++){
+        					//System.out.println(" Added Trip id: "+list.get(l).trip_id);
+        					tripIds.add(list.get(l).trip_id);
+        				}
+            			Collections.sort(tripIds);
+            			
+            			ArrayList<StopTimes> sortedList = new ArrayList<StopTimes>();
+                		for(int i = 0;i < tripIds.size();i++) {
+                			for(int j = 0;j< list.size();j++){
+                				if(tripIds.get(i) == list.get(j).trip_id) {
+                					sortedList.add(list.get(j));
+                				}
+                			}
+                		}
+                		for(int i = 0;i < sortedList.size();i++) {
+                			//System.out.println(sortedList.get(i).trip_id);
+                			System.out.println("Trip id: "+sortedList.get(i).trip_id+" , Arrival time: "+sortedList.get(i).arrival_time+" , Departure time: "+sortedList.get(i).departure_time+" , Stop id: "
+                					+sortedList.get(i).stop_id+" , Stop sequence: "+sortedList.get(i).stop_sequence+" , Stop headsign: "+sortedList.get(i).stop_headsign+" , pickup type: "+sortedList.get(i).pickup_type+" , dropoff type: "+
+                					sortedList.get(i).dropoff_type+" , shape dist travelled: "+sortedList.get(i).shape_dist_traveled);
+                		}
+            			
+            		}
+            		else {
+            			System.out.println("No trips with the arrival time: "+inputTime);//+"\nPlease input another arrival time or type exit to go back to menu");
+            		}
+        			System.out.println("\nPlease input another arrival time or type exit to go back to menu");
         		}
-    			
-    		}
-    		else {
-    			System.out.println("No trips with the arrival time: "+inputTime);
-    		}
+        		//System.out.println("");
+        		//System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time \n Or enter exit to stop the program");
+            	
+        		
+        		
+        		
+        	}
     		
     	}
+    	
     	input.close();
     }
 }
+
