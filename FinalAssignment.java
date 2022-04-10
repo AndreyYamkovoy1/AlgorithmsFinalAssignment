@@ -1,27 +1,38 @@
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.Scanner;
 import java.io.File; 
 import java.io.FileWriter; 
 public class FinalAssignment {
 	
-	
-	
+	HashMap<String,ArrayList<StopTimes>> map= new HashMap<String,ArrayList<StopTimes>>();
+	TST TSTtree = new TST();
 	int numTransfers = 0;
 	int numStops = 0;
 	int largestID = 0;
-	
+	int numStopTimes = 0;
 	FinalAssignment(String stopsFilename,String stopTimesFilename,String transfersFilename){	
 		this.StopsList = getStops(this.StopsList,stopsFilename);	
-		//this.StopsTimesList = getStopsTimes(this.StopsTimesList,stopTimesFilename);
 		this.TransfersList = getTransfers(this.TransfersList,transfersFilename);
-	}
+		this.StopsTimesList = getStopsTimes(this.StopsTimesList,stopTimesFilename);
+
+		//for(int i = 0;i < StopsList.size();i++){
+		//	TSTtree.put(StopsList.get(i).stop_name,StopsList.get(i));
+		//}
+		
+
+		}
 	
 	public class Stop{
 		//stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,location_type,parent_station
@@ -163,6 +174,66 @@ public class FinalAssignment {
 		
 		return transfers;
 	}
+	
+	private String convertStopName(String name) {
+
+		String substring = name.substring(0,8).toUpperCase();
+		if(substring.equals("FLAGSTOP")){
+			name = name.substring(9,name.length())+ " "+ name.substring(0,8);				
+		}
+		if(name.substring(0,3).toUpperCase().equals("WB ")){
+			name = name.substring(3,name.length())+ " "+ name.substring(0,2);				
+		}
+		if(name.substring(0,3).toUpperCase().equals("NB ")){
+			name = name.substring(3,name.length())+ " "+ name.substring(0,2);				
+		}
+		if(name.substring(0,3).toUpperCase().equals("SB ")){
+			name = name.substring(3,name.length())+ " "+ name.substring(0,2);				
+		}
+		substring = name.substring(0,3).toUpperCase();
+		if(substring.equals("EB ")){
+			name = name.substring(3,name.length())+ " "+ name.substring(0,2);				
+		}		
+		return name;
+	}
+	
+	public String fixTime(String time){
+		String input = time;
+		if(time.charAt(0) == ' ') {
+			input = "0"+input.substring(1);
+		}
+		
+		Integer firstNum = (Integer.parseInt(input.substring(0,1))*10)+(Integer.parseInt(input.substring(1,2)));
+		Integer secondNum = (Integer.parseInt(input.substring(3,4))*10)+(Integer.parseInt(input.substring(4,5)));
+		Integer thirdNum = (Integer.parseInt(input.substring(6,7))*10)+(Integer.parseInt(input.substring(7,8)));
+		String timeValue1 = "";
+		String timeValue2 = "";
+		String timeValue3 = "";
+		if( firstNum > 23){
+			timeValue1 = "23";
+		}
+		if(secondNum > 59){
+			timeValue2 = "59";
+		}
+		if(thirdNum > 59){
+			timeValue3 = "59";
+		}
+		timeValue1 = firstNum.toString();
+		timeValue2 = secondNum.toString();
+		timeValue3 = thirdNum.toString();
+		if(firstNum < 10) {
+			timeValue1 = "0"+timeValue1;
+		}
+		if(secondNum < 10) {
+			timeValue2 = "0"+timeValue2;
+		}
+		if(thirdNum < 10) {
+			timeValue3 = "0"+timeValue3;
+		}
+		String result = timeValue1+":"+timeValue2+":"+timeValue3;
+		return result;
+	}
+	
 	public ArrayList<Stop> getStops(ArrayList<Stop> stops,String stopsFileName){
 		try {
 			FileInputStream fstream = new FileInputStream(stopsFileName);
@@ -206,6 +277,10 @@ public class FinalAssignment {
 					}
 					
 					new_stop_name = values[2];
+					if(!new_stop_name.equals(" ")) {
+						new_stop_name = convertStopName(new_stop_name);
+					}
+					
 					new_stop_desc = values[3];
 					if(values[4].equals(" ")){
 						new_stop_lat = -1;
@@ -270,7 +345,7 @@ public class FinalAssignment {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String strLine;
 			int fileLineNum = 0;
-			
+			int i =0;
 			// Loop that reads every line, breaks it into different pieces and assigns to stop class values
 			while((strLine = br.readLine()) != null) {
 				System.out.println(fileLineNum);
@@ -293,7 +368,10 @@ public class FinalAssignment {
 						new_trip_id = Integer.parseInt(values[0]);
 					}
 					new_arrival_time = values[1];
+					new_arrival_time = fixTime(new_arrival_time);
+					
 					new_departure_time = values[2];
+					new_departure_time = fixTime(new_departure_time);
 					if(values[3].equals(" ")){
 						new_stop_id = -1;
 					}
@@ -331,13 +409,28 @@ public class FinalAssignment {
 							new_stop_id+" , Stop sequence: "+new_stop_sequence+" , Stop headsign: "+new_stop_headsign+" , pickup type: "+new_pickup_type+" , dropoff type: "+
 							new_dropoff_type+" , shape dist travelled: "+new_shape_dist_traveled);
 					stopTimes.add(newStopTimes);
+					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
+					if(map.containsKey(new_arrival_time) == false){
+
+						 
+						list.add(newStopTimes);
+						map.put(new_arrival_time,list);
+					}
+					else if(map.containsKey(new_arrival_time)){
+						list = map.get(new_arrival_time);
+						list.add(newStopTimes);
+						map.put(new_arrival_time,list);
+					}
 				}
 				else if(fileLineNum == 0){
 					
 				}
+				i++;
 				fileLineNum++;
 				
 			}
+			numStopTimes = fileLineNum-1;
+			System.out.println("Number of StopTimes): "+numStopTimes);
 			in.close();
 		}
 		//Error catcher
@@ -406,7 +499,7 @@ public class FinalAssignment {
 	 {
 		 System.out.print("Calculating floyd warshall algh");
 	     for(int k = 0; k < V; k++){
-	    	 System.out.println(k);
+	    	// System.out.println(k);
 	    	 for(int i = 0; i < V; i++){
 	    		 for(int j = 0; j < V; j++){
 	    			 if(distance[i][k] == Double.MAX_VALUE || distance[k][j] == Double.MAX_VALUE){
@@ -435,6 +528,7 @@ public class FinalAssignment {
 		}
 		return result;
 	}
+	
 	public double[][] makeGraph(int size,double[][] graph){
 		
 		
@@ -473,6 +567,43 @@ public class FinalAssignment {
     		System.out.println("x: "+x+" y: "+ y);
     		graph[m][n] = weight;
     	}
+    	for(int i = 0;i < numStopTimes;i++){
+    		
+    		x = StopsTimesList.get(i).trip_id;
+    		if(i < numStopTimes-2) {
+    			y = StopsTimesList.get(i+1).trip_id;	
+    		}
+    		else {
+    			y = 0;
+    		}
+    		int m = 0;
+    		int n = 0;
+    		if(x == y) {
+    			x = StopsTimesList.get(i).stop_id;
+    			y = StopsTimesList.get(i+1).stop_id;	
+    			for(int j = 0;j<numStops;j++){
+        			if(StopsList.get(j).stop_id == x) {
+        				m = StopsList.get(j).stopOrderFromInput;
+        			}
+        			if(StopsList.get(j).stop_id == y) {
+        				n = StopsList.get(j).stopOrderFromInput;
+        			}
+        		}
+    		}
+    		else {
+    			m = 0;
+    			n= 0;
+    			x = 0;
+    			y= 0;
+    		}
+    		weight = 1.0;
+    		graph[m][n] = weight;
+    		System.out.println("m: "+m+" n: "+n+" weight: "+weight);
+    		System.out.println("x: "+x+" y: "+ y);
+    		
+    	}
+    	
+    	
     			
 		return graph;
 	}
@@ -484,15 +615,6 @@ public class FinalAssignment {
 	    System.out.print(result.path.get(n - 1) + "\n");
 	    System.out.println("Path cost: "+result.sum);
 	}
-	/*
-	public int getStopIndex(String request){
-		int result = 0;
-		System.out.print(request);
-		if(input.hasNextLine()) {
-			String inputString = input.nextLine();
-			System.out.print(inputString);
-		}
-		*/
 		public int getStopIndex(int inputId) {
 		int index = 0;
 		for(int i = 0;i< numStops;i++) {
@@ -503,50 +625,417 @@ public class FinalAssignment {
 		}
 		return index;
 	}
-	public String createFile(){
-		String newFileName = "";
+	public String createDistanceFile(){
+		
+		String newDistanceFileName = "";
 		try {
-			newFileName = "results.txt";
-			File newFile = new File(newFileName);
-			if (newFile.createNewFile()) {
-		        System.out.println("File created: " + newFile.getName());
+			newDistanceFileName = "distanceResults.txt";
+			File newDistanceFile = new File(newDistanceFileName);
+			if (newDistanceFile.createNewFile()) {
+		        System.out.println("Distance File created: " + newDistanceFile.getName());
 		      } else {
-		        System.out.println("File already exists.");
+		        System.out.println("Distance File already exists.");
 		      }
+			
 		}
 		catch(IOException e){
-			System.out.println("Error with creating file");
+			System.out.println("Error with distance creating file");
 		}
-		return newFileName;
+		return newDistanceFileName;
 	}
-	public void writeToFile(String newFileName){
+	public String createNextFile(){
+		String newNextFileName = "";
 		try {
-    		FileWriter writer = new FileWriter(newFileName);
-    		writer.write("test");
+			newNextFileName = "nextResults.txt";
+			File newNextFile = new File(newNextFileName);
+			if (newNextFile.createNewFile()) {
+		        System.out.println("Next File created: " + newNextFile.getName());
+		      } else {
+		        System.out.println("Next File already exists.");
+		      }
+		}
+		catch(IOException e) {
+			System.out.println("Error with next creating file");
+		}
+		return newNextFileName;
+	}
+
+	public void writeToDistanceFile(String newDistanceFileName,double[][] distance){
+		try {
+    		
+    		PrintWriter writer2 = new PrintWriter(newDistanceFileName);
+    		writer2.print("");
+    		writer2.close();
+    		
+    		FileWriter writer = new FileWriter(newDistanceFileName,false);
+    		writer.write(numStops+"");
+    		
+    		for(int i = 0;i < numStops;i++) {
+    			writer.write("\n");
+    			for(int j = 0;j< numStops;j++){
+    				if(j != 0) {
+    					writer.write(",");
+    				}
+    				writer.write(Double.toString(distance[i][j]));
+    			}
+    		}
     		writer.close();
-    		System.out.println("Wrote to the file");
+    		System.out.println("Wrote to the distance file: distanceResult.txt");
     	}
-    	catch(IOException e){
-    		System.out.println("Error with writer");
+    	catch(Exception e){
+    		System.err.println("Error: " + e.getMessage());
     	}
+	}
+
+	public void writeToNextFile(String newNextFileName,int[][] next){
+		try {
+    		
+    		PrintWriter writer4 = new PrintWriter(newNextFileName);
+    		writer4.print("");
+    		writer4.close();
+    		FileWriter writer3 = new FileWriter(newNextFileName,false);
+    		writer3.write(numStops+"");
+    		for(int i = 0;i < numStops;i++) {
+    			writer3.write("\n");
+    			for(int j = 0;j< numStops;j++){
+    				if(j != 0) {
+    					writer3.write(",");
+    				}
+    				writer3.write(Integer.toString(next[i][j]));
+    			}
+    		}
+    		writer3.close();
+    		
+    		
+    		System.out.println("Wrote to the next file: nextResults.txt");
+    	}
+    	catch(Exception e){
+    		System.err.println("Error: " + e.getMessage());
+    	}
+	}
+	public double[][] readDistanceAnswers(String fileName){
+		double[][] results = null;
+		try {
+			FileInputStream fstream = new FileInputStream(fileName);
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			
+			int fileLineNum = 0;
+			String strLine;
+			int size = 0;
+			
+			while((strLine = br.readLine()) != null) {
+				System.out.println(fileLineNum);
+				
+					
+					if(fileLineNum == 0) {
+						size = Integer.parseInt(strLine);
+						results = new double[size][size];
+					}
+					else {
+						String[] values = strLine.split(",");
+						for(int i = 0;i < numStops;i++) {
+							results[fileLineNum-1][i] = Double.parseDouble(values[i]); 
+						}
+					}
+				
+				fileLineNum++;
+			}
+			
+			in.close();
+		}
+		catch(Exception e){
+				System.err.println("Error: " + e.getMessage());
+		}
+		
+		return results;
+		
+	}
+	public int[][] readNextAnswers(String fileName){
+		int[][] results = null;
+		try {
+			FileInputStream fstream = new FileInputStream(fileName);
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			
+			int fileLineNum = 0;
+			String strLine;
+			int size = 0;
+			
+			while((strLine = br.readLine()) != null) {
+				System.out.println(fileLineNum);
+				
+					
+					if(fileLineNum == 0) {
+						size = Integer.parseInt(strLine);
+						results = new int[size][size];
+					}
+					else {
+						String[] values = strLine.split(",");
+						for(int i = 0;i < numStops;i++) {
+							results[fileLineNum-1][i] = Integer.parseInt(values[i]); 
+						}
+					}
+					
+					
+				
+				fileLineNum++;
+			}
+			
+			in.close();
+		}
+		catch(Exception e){
+				System.err.println("Error: " + e.getMessage());
+		}
+		return results;
+		
+		
+	}
+	public class TST<T>{
+		private TSTNode<T> root;
+		public TST(){
+			root = null;
+	 	}
+		public TSTNode<T> search(String input){
+			if(root == null) {
+				return null;
+			}
+			else {
+				return root.search(input);
+			}
+		}
+		
+		public ArrayList<T> searchAll(String key){
+			return root.searchAll(key);
+		}
+
+	 	public boolean put(String key,T val) {
+	 		  if (root == null) {
+	 		        root = new TSTNode<T>(key, val);
+	 		        return true;
+	 		    } else {
+	 		        return root.put(key,val) != null;
+	 		    }
+	
+	 	}
+		public class TSTNode<T>{
+			char character;
+			TSTNode<T> left = null;
+			TSTNode<T> middle = null;
+			TSTNode<T> right = null;
+			T value = null;
+			public TSTNode(String key, T value) {
+				if (key.isEmpty() || value == null) {
+					throw new IllegalArgumentException();
+				}
+				character = key.charAt(0);
+				if (key.length() > 1) {
+					// Stores the rest of the key in a midlle-link chain
+					middle = new TSTNode(key.substring(1), value);
+				} else {
+					this.value = value;
+				}
+			}
+			private TSTNode<T> put(String key,T val) {
+				if(key.length() == 0)
+					return null;
+				Character ch = key.charAt(0);
+				if(character == (ch)) {
+					if(key.length() == 1) {
+						boolean updated = this.storesKey();
+						this.value = val;
+						if(updated){
+							return null;
+						}
+						else {
+							return this;
+						}
+					}
+					else if(this.middle != null) {
+						return middle.put(key.substring(1),val);
+					}
+					else {
+						this.middle = new TSTNode(key.substring(1),val);
+						return middle.search(key.substring(1),0);
+					}
+				}
+				else if(ch.compareTo(character) < 0) {
+					if(this.left != null){
+						return left.put(key, val);
+					}
+					else {
+						left = new TSTNode(key,val);
+						return left.search(key,0);
+					}
+				}
+				else  {
+					if(this.right != null) {
+						return right.put(key, val);
+					}
+					else {
+						right = new TSTNode(key,val);
+						return right.search(key,0);
+					}
+				}				
+			}
+			private boolean storesKey() {
+			    return this.value != null;
+			}
+			
+			void collectValues(String key, int index, TSTNode<T> node, ArrayList<T> result) {
+				if( node.value != null) {
+					result.add(node.value);
+					index = index + 1;
+				}				
+				if(node.left != null) {
+						collectValues(key, index, node.left,result);
+				}
+				if(node.middle != null) {
+						collectValues(key, index, node.middle,result);
+				}
+				if(node.right != null) {
+						collectValues(key, index, node.right,result);
+				}				
+			}
+			
+			public ArrayList<T> searchAll(String key){
+				ArrayList<T> result = new ArrayList<T>();
+				searchAllValues(key, result);
+				return result;
+			}
+			
+			public void searchAllValues(String key,ArrayList<T> result){
+				searchAllValues(key,0, result);
+			}
+
+			private void searchAllValues(String key,int index, ArrayList<T> result){
+				 if (key.isEmpty()) {
+				        return;
+				 }
+				
+				if (index >= key.length()) {
+			        return; //collectValues(this,result);
+			    }
+				 Character c = key.charAt(index);
+				 if(c == this.character) {
+					 if(key.substring(index).length() == 1) {
+						 if(value != null) {
+							 result.add(this.value);
+							 return;
+						 }
+						 else {
+						      collectValues(key, index, this.middle, result);
+						 }
+					 }
+					 else {
+						 if(this.middle == null) {
+							 return;
+						 }
+						 else if(this.middle != null) {
+							 this.middle.searchAllValues(key,index+1,result);
+							 return;
+						 }
+					 }
+				 }
+				 else if(c.compareTo(this.character) < 0){
+					 if(this.left == null) {
+						 return;
+					 }
+					 else if(this.left != null) {
+						 this.left.searchAllValues(key,index,result);
+						 return;
+					 }
+				 }
+				 else{
+					 if(this.right == null) {
+						 return;
+					 }
+					 else if(this.right != null) {
+						 this.right.searchAllValues(key,index,result);
+						 return;
+					 }
+				 }
+				 return;
+			}
+			
+			
+			
+			public TSTNode<T> search(String key){
+				TSTNode<T> node = search(key,0);
+				if(node == null){
+					return null;
+				}
+				else {
+					return node;					
+				}
+			}
+			private TSTNode<T> search(String key,int index){
+				if (index >= key.length()) {
+			        return null;
+			    }
+				 if (key.isEmpty()) {
+				        return null;
+				 }
+				 Character c = key.charAt(index);
+				 if(c == this.character) {
+					 if(key.substring(index).length() == 1) {
+						 return this;
+					 }
+					 else {
+						 if(this.middle == null) {
+							 return null;
+						 }
+						 else if(this.middle != null) {
+							 return this.middle.search(key,index+1);
+						 }
+					 }
+				 }
+				 else if(c.compareTo(this.character) < 0){
+					 if(this.left == null) {
+						 return null;
+					 }
+					 else if(this.left != null) {
+						 return this.left.search(key,index);
+					 }
+				 }
+				 else{
+					 if(this.right == null) {
+						 return null;
+					 }
+					 else if(this.right != null) {
+						 return this.right.search(key,index);
+					 }
+				 }
+				 return null;
+			}
+		}
 	}
 	public static void main(String[] args) throws FileNotFoundException {
-    	FinalAssignment test = new FinalAssignment("smallStops","stop_times.txt","smallTransfers");
+    	//FinalAssignment test = new FinalAssignment("smallStops","smallStoptimes","smallTransfers");
+    	FinalAssignment test = new FinalAssignment("stops.txt","stop_times.txt","transfers.txt");
     	Scanner input = new Scanner(System.in);
-    	
     	System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
-    	if(input.nextInt() == 1) {
+    	Integer choice = input.nextInt();
+    	//System.out.println("Choose which function you want to use: \n Input 1 for ShortestPath between two points \n Input 2 to Search for bus stop by name \n Input 3 to search for all trips with a given arrival time");
+    	if(choice == 1) {
+    		
     		double[][] graph = new double[test.numStops][test.numStops];
         	graph = test.makeGraph(test.numStops,graph);
+        	
         	double[][] distance = new double [test.numStops][test.numStops];
         	int[][] next = new int [test.numStops][test.numStops];
+        	
         	test.initializeMatrix(test.numStops, graph,distance,next);
+        	
         	test.floydWarshall(test.numStops,distance,next);
         	
-        	String newFile = test.createFile();
-        	test.writeToFile(newFile);
+        	//String newDistanceFile = test.createDistanceFile();
+        	//String newNextFile = test.createNextFile();
+        	//test.writeToDistanceFile(newDistanceFile,distance);
+        	//test.writeToNextFile(newNextFile,next);
         	
-        	
+        	//distance = test.readDistanceAnswers("distanceResults.txt");
+        	//next = test.readNextAnswers("nextResults.txt");
         	
         	
         	ShortestPathResult result;
@@ -565,7 +1054,77 @@ public class FinalAssignment {
         	test.printPath(result);
         	
     	}
-    	
+    	if(choice == 2) {
+    		System.out.println("Input stop name:");
+    		//while(input.hasNext()) {
+    			String inputStopName = "WATERFRONT";
+        		inputStopName.toUpperCase();
+        		ArrayList<Stop> result_cute = test.TSTtree.searchAll(inputStopName);	
+    		//}
+    		
+    	}
+    	if(choice == 3){
+    		
+    		for(Integer i = 0;i<24;i++) {
+    			for(Integer j = 0;j<60;j++){
+    				for(Integer k = 0;k < 60;k++) {
+    					String val1 = i.toString();
+    					String val2 = j.toString();
+    					String val3 = k.toString();
+    					if(i < 10){
+    						val1 = "0"+val1;
+    					}
+    					if(j < 10){
+    						val2 = "0"+val2;
+    					}
+    					if(k < 10){
+    						val3 = "0"+val3;
+    					}
+    					String time =val1+":"+val2+":"+val3;
+    					//time = test.fixTime(time);
+    					ArrayList<StopTimes> list = new ArrayList<StopTimes>();
+    					if(test.map.containsKey(time)) {
+    						list = test.map.get(time);
+        					for(int l = 0;l < list.size();l++){
+        						System.out.println("Trip id: "+list.get(l).trip_id+","+" arrival time: "+time);
+        					}
+    					}
+    					
+    				}
+    			}
+    		}
+    		ArrayList<Integer> tripIds = new ArrayList<Integer>();
+    		ArrayList<StopTimes> list = new ArrayList<StopTimes>();
+    		String inputTime = "00:00:20";
+    		if(test.map.containsKey(inputTime)) {
+    			list = test.map.get(inputTime);
+    			for(int l = 0;l < list.size();l++){
+					System.out.println(" Added Trip id: "+list.get(l).trip_id);
+					tripIds.add(list.get(l).trip_id);
+				}
+    			Collections.sort(tripIds);
+    			
+    			ArrayList<StopTimes> sortedList = new ArrayList<StopTimes>();
+        		for(int i = 0;i < tripIds.size();i++) {
+        			for(int j = 0;j< list.size();j++){
+        				if(tripIds.get(i) == list.get(j).trip_id) {
+        					sortedList.add(list.get(j));
+        				}
+        			}
+        		}
+        		for(int i = 0;i < sortedList.size();i++) {
+        			//System.out.println(sortedList.get(i).trip_id);
+        			System.out.println("Trip id: "+sortedList.get(i).trip_id+" , Arrival time: "+sortedList.get(i).arrival_time+" , Departure time: "+sortedList.get(i).departure_time+" , Stop id: "
+        					+sortedList.get(i).stop_id+" , Stop sequence: "+sortedList.get(i).stop_sequence+" , Stop headsign: "+sortedList.get(i).stop_headsign+" , pickup type: "+sortedList.get(i).pickup_type+" , dropoff type: "+
+        					sortedList.get(i).dropoff_type+" , shape dist travelled: "+sortedList.get(i).shape_dist_traveled);
+        		}
+    			
+    		}
+    		else {
+    			System.out.println("No trips with the arrival time: "+inputTime);
+    		}
+    		
+    	}
     	input.close();
     }
 }
